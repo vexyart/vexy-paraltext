@@ -1,0 +1,39 @@
+# this_file: paraltext.example.toml
+# Copy to paraltext.toml in a book folder, the working directory, or ~/.config/vexy-paraltext/.
+# Every key is optional; these are the defaults.
+
+pivot = "en"        # source language for alignment (falls back to the first edition)
+# min_langs = 3     # keep a unit when at least N editions align (default: all of them)
+cache_dir = ".paraltext"
+
+[convert]
+epub2md = "~/bin/epub2md.py"   # or set VEXY_EPUB2MD
+workers = 3                    # editions converted in parallel
+
+[normalize]                    # LLM clean-up between convert and embed
+enabled = true                 # false: segment the raw markdown (fast, slightly noisier)
+model = "gemma-4-26b-a4b-it-qat-mxfp8"   # any model id served by LM Studio
+base_url = "http://localhost:1234/v1"
+workers = 4                    # concurrent requests; 4 doubled throughput on an M-series Mac, 8 did not help
+chunk_chars = 3000
+max_tokens = 2500
+temperature = 0.1
+timeout = 1800.0
+
+[embed]
+model = "jina"                 # alias below, or a GGUF path; jina = most links across 15 languages, gemma = best on major Western languages, granite = most even + Apache 2.0
+threshold = 1.05               # margin-score cutoff; 1.0 = more pairs, 1.1 = half as many
+gap_min_cos = 0.6              # cosine needed to pair lone sentences between two aligned links
+center = true                  # subtract the mean vector before mining; needed for compressed spaces (granite), harmless for the others
+
+[embed.models.gemma]
+path = "/Volumes/Falstaff4T/RomeoData2/lmstudio/models/mntcloud/embeddinggemma-300m-Q8_0-better-gguf/embeddinggemma-300M-Q8_0.gguf"
+prefix = "task: sentence similarity | query: "
+
+[embed.models.granite]
+path = "/Volumes/Falstaff4T/RomeoData2/lmstudio/models/mykor/granite-embedding-311m-multilingual-r2-GGUF/granite-embedding-311M-multilingual-r2-Q8_0.gguf"
+prefix = ""
+
+[embed.models.jina]
+path = "/Volumes/Falstaff4T/RomeoData2/lmstudio/models/jinaai/jina-embeddings-v5-text-nano-text-matching/v5-nano-text-matching-Q8_0.gguf"
+prefix = "Query: "

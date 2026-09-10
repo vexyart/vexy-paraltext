@@ -1,0 +1,63 @@
+[project]
+name = "vexy-paraltext"
+version = "0.1.0"
+description = "Build compact TMX translation memories from multilingual book editions (PDF/EPUB) with local embedding models."
+readme = "README.md"
+authors = [
+    { name = "Adam Twardoch", email = "adam@twardoch.com" }
+]
+requires-python = ">=3.12"
+dependencies = [
+    "diskcache>=5.6.3",
+    "fire>=0.7.1",
+    "httpx>=0.28.1",
+    "llama-cpp-python>=0.3.35",
+    "loguru>=0.7.3",
+    "numpy>=2.5.3",
+    "pymupdf>=1.28.2",
+    "pysbd>=0.3.4",
+]
+
+[project.scripts]
+vexy-paraltext = "vexy_paraltext.cli:main"
+
+[build-system]
+requires = ["uv_build>=0.12.3,<0.13.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+lint = [
+    "ruff>=0.16.6",
+    "ty>=0.0.79",
+]
+ocr = [
+    "docling>=2.126.0",
+]
+test = [
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+]
+
+[tool.ruff]
+line-length = 160
+target-version = "py312"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["ALL"]
+ignore = ["D", "COM812", "ISC001", "E501", "T201", "PLR2004", "S101", "ANN401", "FBT001", "FBT002", "PLR0913", "PLR0917", "E741", "CPY001", "ERA001", "TC001", "TC002", "TC003"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["INP001", "S101", "PLR2004", "ANN", "S314", "ARG", "RUF012", "RUF059"]
+"scripts/*" = ["INP001", "T201", "S101", "S108", "EXE001"]
+
+[tool.pytest.ini_options]
+addopts = ["--cov=vexy_paraltext", "--cov-report=term-missing", "--cov-fail-under=80", "-q"]
+testpaths = ["tests"]
+filterwarnings = ["ignore::SyntaxWarning", "ignore::DeprecationWarning"]
+
+[tool.ty.terminal]
+error-on-warning = false
+
+[tool.ty.environment]
+python-version = "3.12"

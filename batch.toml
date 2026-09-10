@@ -1,0 +1,4 @@
+[normalize]
+enabled = false
+[convert]
+workers = 4

@@ -216,3 +216,14 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+ebook-font-l10n
+llm-embed
+
+
+# local tooling state and run logs
+.omc/
+.codegraph/
+codegraph.json
+.DS_Store
+batch*.log
+paraltext-cache/
