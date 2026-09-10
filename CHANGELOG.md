@@ -9,9 +9,9 @@ this_file: CHANGELOG.md
 - TMX output removes XML 1.0-forbidden characters from segment text and metadata, and quotes attribute values safely. Legal Unicode and XML whitespace remain intact.
 - Repaired all three affected collection TMX files (19 forbidden characters); all 37 files parse successfully, retaining 131,295 translation units.
 
-## 0.1.0 (2026-09-09)
+## 1.0.0 (2026-09-10)
 
-- Package scaffold (`uv`, `src/` layout, ruff, ty, pytest at 84% coverage).
+- Package scaffold (`uv`, `src/` layout, ruff, ty, pytest at 91% coverage). Tagged v1.0.0 by gitnextver.
 - Pipeline: convert (markit / docling / epub2md), segment (pysbd), embed (llama.cpp GGUF, cached), align (margin mining + monotonic filter, 1-1 and 2-1 spans), TMX writer.
 - CLI `vexy-paraltext run|batch`.
 - PDF converter bake-off and jina-vs-gemma comparison recorded in WORK.md.

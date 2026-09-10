@@ -1,6 +1,6 @@
 [project]
 name = "vexy-paraltext"
-version = "0.1.0"
+version = "1.0.0"
 description = "Build compact TMX translation memories from multilingual book editions (PDF/EPUB) with local embedding models."
 readme = "README.md"
 authors = [
