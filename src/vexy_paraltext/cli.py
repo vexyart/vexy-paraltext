@@ -4,13 +4,14 @@
 from __future__ import annotations
 
 import sys
+from dataclasses import replace
 from pathlib import Path
 
 import fire
 from loguru import logger
 
 from vexy_paraltext import pipeline
-from vexy_paraltext.config import load_config
+from vexy_paraltext.config import ModelSpec, load_config
 
 
 def _log(verbose: bool) -> None:
@@ -22,6 +23,19 @@ def _book(book_dir: str, config: str | None, verbose: bool) -> pipeline.Book:
     _log(verbose)
     path = Path(book_dir)
     return pipeline.Book(path, load_config(path, Path(config) if config else None))
+
+
+def _embedding_options(book: pipeline.Book, model: str | None, backend: str | None, dimensions: int | None, precision: str | None) -> None:
+    """Apply explicit CLI overrides to this invocation's loaded configuration."""
+    if dimensions is not None:
+        book.cfg.embed.dimensions = dimensions
+    if precision is not None:
+        book.cfg.embed.precision = precision
+    if backend is not None:
+        alias = model or book.cfg.embed.model
+        spec = book.cfg.embed.models.get(alias, ModelSpec(model=alias))
+        prefix = None if backend in {"jina", "voyage"} else spec.prefix
+        book.cfg.embed.models[alias] = replace(spec, backend=backend, prefix=prefix)
 
 
 class Cli:
@@ -41,9 +55,11 @@ class Cli:
         paths = pipeline.run_normalize(_book(book_dir, config, verbose), force=force)
         return "\n".join(str(p) for p in paths)
 
-    def embed(self, book_dir: str, model: str | None = None, limit: int | None = None, config: str | None = None, verbose: bool = False) -> str:
-        """Stage 3: sentence embeddings into the disk cache (``model``: alias from config or GGUF path)."""
-        eds = pipeline.run_embed(_book(book_dir, config, verbose), model=model, limit=limit)
+    def embed(self, book_dir: str, model: str | None = None, limit: int | None = None, config: str | None = None, verbose: bool = False, backend: str | None = None, dimensions: int | None = None, precision: str | None = None) -> str:
+        """Stage 3: sentence embeddings into the disk cache (``model``: alias from config or a GGUF path declared in config)."""
+        book = _book(book_dir, config, verbose)
+        _embedding_options(book, model, backend, dimensions, precision)
+        eds = pipeline.run_embed(book, model=model, limit=limit)
         return "\n".join(f"{lang}: {len(ed.sentences)} sentences embedded" for lang, ed in eds.items())
 
     def align(
@@ -57,12 +73,15 @@ class Cli:
         out: str | None = None,
         config: str | None = None,
         verbose: bool = False,
+        backend: str | None = None,
+        dimensions: int | None = None,
+        precision: str | None = None,
     ) -> str:
         """Stage 4: mine parallel sentences and write ``<book_dir>/<book>.tmx``.
 
         Args:
             book_dir: folder with ``<lang>/<file>.pdf|epub`` subfolders.
-            model: embedding model alias (config default: jina) or GGUF path.
+            model: embedding model alias (config default: jina) or a GGUF path declared in config.
             pivot: source language (default ``en`` if present).
             threshold: margin-score cutoff; higher = fewer, cleaner pairs.
             min_langs: keep a unit when at least this many languages align (default: all).
@@ -72,6 +91,7 @@ class Cli:
             verbose: debug logging.
         """
         book = _book(book_dir, config, verbose)
+        _embedding_options(book, model, backend, dimensions, precision)
         res = pipeline.run_align(book, model=model, pivot=pivot, threshold=threshold, min_langs=min_langs, limit=limit, out=Path(out) if out else None)
         return f"{len(res.units)} units -> {res.tmx}"
 
@@ -87,9 +107,13 @@ class Cli:
         config: str | None = None,
         force: bool = False,
         verbose: bool = False,
+        backend: str | None = None,
+        dimensions: int | None = None,
+        precision: str | None = None,
     ) -> str:
         """All stages: convert, normalize, embed, align (``force`` redoes convert and normalize)."""
         book = _book(book_dir, config, verbose)
+        _embedding_options(book, model, backend, dimensions, precision)
         res = pipeline.run_all(
             book, force=force, model=model, pivot=pivot, threshold=threshold, min_langs=min_langs, limit=limit, out=Path(out) if out else None
         )

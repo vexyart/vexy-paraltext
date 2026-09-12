@@ -78,3 +78,9 @@ uv run ruff format --check && uv run ruff check && uv run ty check src/
 uv run scripts/compare_lakoff.py BOOK 0 1.05 jina,gemma,granite   # per-language yield, agreement, multi-way units
 uv run scripts/compare_models.py BOOK 2000                        # jina vs gemma on a slice, with sample disagreements
 ```
+
+## Releases and local data
+
+`./publish.sh --dry-run` verifies the next release without pushing or uploading.
+`./publish.sh` commits, tags and publishes it. See [RELEASING.md](RELEASING.md)
+for credentials, same-tag retries, dependency order and private-data exclusions.

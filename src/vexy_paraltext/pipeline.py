@@ -148,7 +148,7 @@ def load_edition(book: Book, lang: str, *, limit: int | None = None) -> Edition:
 
 def run_embed(book: Book, *, model: str | None = None, limit: int | None = None) -> dict[str, Edition]:
     """Stage 3: embed sentences and adjacent pairs of every edition into the disk cache."""
-    embedder = Embedder.from_alias(model or book.cfg.embed.model, book.cfg.embed.models)
+    embedder = Embedder.from_alias(model or book.cfg.embed.model, book.cfg.embed.models, options=book.cfg.embed)
     cache = EmbeddingCache(book.cache / "cache")
     try:
         eds = {}
@@ -160,6 +160,7 @@ def run_embed(book: Book, *, model: str | None = None, limit: int | None = None)
         return eds
     finally:
         cache.close()
+        embedder.close()
 
 
 def run_align(

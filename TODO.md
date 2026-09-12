@@ -9,3 +9,7 @@ this_file: TODO.md
 - [ ] Language-split for multilingual single volumes (`de-en` folders)
 - [ ] Batch run over all 40 books; OCR language packs for scanned PDFs
 - [ ] docling segfaults (exit -11) on some scans (Ogilvy on Advertising en): try ocrmac or page-batched OCR as a fallback engine
+
+## Release tooling — completed 2026-09-12
+
+- [x] Provide verified Git-tag releases, a real dry run, same-tag retries, and private-data exclusions.

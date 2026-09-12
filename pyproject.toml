@@ -1,6 +1,6 @@
 [project]
 name = "vexy-paraltext"
-version = "1.0.0"
+dynamic = ["version"]
 description = "Build compact TMX translation memories from multilingual book editions (PDF/EPUB) with local embedding models."
 readme = "README.md"
 authors = [
@@ -16,14 +16,20 @@ dependencies = [
     "numpy>=2.5.3",
     "pymupdf>=1.28.2",
     "pysbd>=0.3.4",
+    "uubed[inference]>=1.0.6",
 ]
 
 [project.scripts]
 vexy-paraltext = "vexy_paraltext.cli:main"
 
+[project.optional-dependencies]
+mlx = [
+    "uubed[mlx]>=1.0.6",
+]
+
 [build-system]
-requires = ["uv_build>=0.12.3,<0.13.0"]
-build-backend = "uv_build"
+requires = ["hatchling>=1.27", "hatch-vcs>=0.4"]
+build-backend = "hatchling.build"
 
 [dependency-groups]
 lint = [
@@ -61,3 +67,15 @@ error-on-warning = false
 
 [tool.ty.environment]
 python-version = "3.12"
+
+[tool.hatch.version]
+source = "vcs"
+
+[tool.hatch.build.hooks.vcs]
+version-file = "src/vexy_paraltext/_version.py"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/vexy_paraltext"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src/vexy_paraltext", "tests", "README.md", "LICENSE"]

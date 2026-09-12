@@ -8,6 +8,7 @@ from pathlib import Path
 
 import numpy as np
 from diskcache import Cache
+from uubed.compact import PackedEmbedding, pack
 
 
 def _key(*parts: str) -> str:
@@ -45,14 +46,25 @@ class EmbeddingCache:
             if blob is None:
                 found.append(None)
                 missing.append(i)
+            elif blob.startswith(b"UB1."):
+                record = PackedEmbedding.loads(blob.decode("ascii"))
+                if record.space != model:
+                    msg = "cached embedding space mismatch"
+                    raise ValueError(msg)
+                found.append(record.vector())
             else:
                 found.append(np.frombuffer(blob, dtype=np.float32))
         return found, missing
 
-    def store(self, model: str, texts: list[str], vectors: np.ndarray) -> None:
+    def store(self, model: str, texts: list[str], vectors: np.ndarray, precision: str = "float32") -> None:
         with self.cache.transact():
             for t, v in zip(texts, vectors, strict=True):
-                self.cache.set(_key(model, t), np.ascontiguousarray(v, dtype=np.float32).tobytes())
+                blob = (
+                    np.ascontiguousarray(v, dtype=np.float32).tobytes()
+                    if precision == "float32"
+                    else pack(v, space=model, precision=precision).dumps().encode("ascii")
+                )
+                self.cache.set(_key(model, t), blob)
 
     def close(self) -> None:
         self.cache.close()

@@ -4,6 +4,19 @@ this_file: WORK.md
 
 # Work log
 
+## 2026-09-11: shared uubed inference
+
+- Replaced duplicated llama.cpp inference with the shared uubed engine and
+  configuration-sensitive compact-vector cache. Preserved joint mean-centering,
+  explicit prompts and token-budget defaults.
+- Added backend/dimensions/precision CLI overrides and explicit profiles for GGUF
+  paths, plus API examples and an optional MLX extra. Existing `batch.toml` is untouched.
+- Full suite: 112 passed, 93.49% coverage; ruff and ty pass. A real copied-data
+  EPUB-to-TMX run produced 63 units for float32/int8, 62 identical and one changed
+  alignment; cold/warm cache reads are stable. Root research/301 holds reproducible
+  scripts and sanitized measurements; private artifacts remain in testdata.
+
+
 ## 2026-09-10: TMX forbidden-character repair
 
 - Reproduced the writer failure with regression tests before editing: XML escaping alone left forbidden characters intact. Added a shared XML 1.0 character filter at the serialization boundary and standard-library attribute quoting; no new dependencies. Character ranges follow https://www.w3.org/TR/xml/#charsets.
@@ -252,3 +265,29 @@ The six books under 25% yield were re-aligned with all three models (`candidate-
 | kimberly-elam--geometry-of-design | 179 | 204 (gemma) |
 
 All other books keep their jina TMX. Final count: 37 of 40 books with a TMX; the remaining three plus Hortsch are single editions or single multilingual volumes.
+
+
+### Issue 301 closure
+
+Shared uubed integration passed the final workspace runner: this consumer has
+112 passing tests, 93.49% coverage, source/test ruff and production-source ty clean.
+Real copied FontExplorer EPUB-to-TMX output contains 63 units at both precisions,
+62 identical and one changed alignment. Independent issue review scored 94/100.
+The consumer uv.lock is current; the absolute editable source path and optional
+MLX dependency are documented. Private test results remain in the uubed workspace.
+
+## Release and privacy cleanup
+
+Implemented standalone tag-derived release commands, source/archive privacy gates, fresh artifact manifests, dry runs and same-tag retries. Verification is recorded in the workspace release report. Existing local data remains on disk.
+
+### Release verification — 2026-09-12
+
+113 tests passed; Ruff and ty passed; v1.0.1 wheel/sdist preview verified. Home-relative model paths have a regression test. Shared release-flow suite: 11 passed. Source HEAD and latest tag remained unchanged. No live publication was performed.
+
+## 2026-09-12 — License-file release validation
+
+The shared archive gate now checks every License-File declaration in metadata
+2.4+ against a regular file at the required sdist or wheel location. Missing,
+misplaced and directory-only licenses fail before pushing or uploading. Synced
+the helper across all six repositories. Verification: 14 release-tool tests
+passed; nine existing sibling preview artifacts passed the stronger checks.

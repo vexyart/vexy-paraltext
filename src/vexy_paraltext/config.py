@@ -11,18 +11,27 @@ from typing import Any
 from loguru import logger
 
 CONFIG_NAME = "paraltext.toml"
-_LMS = "/Volumes/Falstaff4T/RomeoData2/lmstudio/models"
+_LMS = str(Path.home() / ".lmstudio" / "models")
 
 
 @dataclass
 class ModelSpec:
-    path: str
-    prefix: str = ""
+    path: str = ""
+    prefix: str | None = None
+    model: str = ""
+    backend: str = "llama.cpp"
+    device: str = "mps"
+    endpoint: str | None = None
 
 
 @dataclass
 class EmbedConfig:
     model: str = "jina"
+    dimensions: int | None = None
+    precision: str = "int8"
+    max_tokens: int = 512
+    batch_tokens: int = 4096
+    batch_size: int = 32
     threshold: float = 1.05
     gap_min_cos: float = 0.6
     center: bool = True  # subtract the mean vector before mining (removes anisotropy; scale-free margins)
@@ -31,6 +40,10 @@ class EmbedConfig:
             "jina": ModelSpec(f"{_LMS}/jinaai/jina-embeddings-v5-text-nano-text-matching/v5-nano-text-matching-Q8_0.gguf", "Query: "),
             "gemma": ModelSpec(f"{_LMS}/mntcloud/embeddinggemma-300m-Q8_0-better-gguf/embeddinggemma-300M-Q8_0.gguf", "task: sentence similarity | query: "),
             "granite": ModelSpec(f"{_LMS}/mykor/granite-embedding-311m-multilingual-r2-GGUF/granite-embedding-311M-multilingual-r2-Q8_0.gguf", ""),
+            "nomic": ModelSpec(model="nomic", backend="sentence-transformers"),
+            "minilm": ModelSpec(model="minilm", backend="sentence-transformers"),
+            "voyage-nano": ModelSpec(model="voyage-nano", backend="sentence-transformers"),
+            "voyage-lite": ModelSpec(model="voyage-lite", backend="voyage"),
         }
     )
 

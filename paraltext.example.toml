@@ -1,6 +1,6 @@
 # this_file: paraltext.example.toml
 # Copy to paraltext.toml in a book folder, the working directory, or ~/.config/vexy-paraltext/.
-# Every key is optional; these are the defaults.
+# Every key is optional. Model paths below are examples; configure local paths on your machine.
 
 pivot = "en"        # source language for alignment (falls back to the first edition)
 # min_langs = 3     # keep a unit when at least N editions align (default: all of them)
@@ -21,19 +21,63 @@ temperature = 0.1
 timeout = 1800.0
 
 [embed]
-model = "jina"                 # alias below, or a GGUF path; jina = most links across 15 languages, gemma = best on major Western languages, granite = most even + Apache 2.0
+model = "jina"                 # configured alias, or a declared GGUF path; jina = most links across 15 languages, gemma = best on major Western languages, granite = most even + Apache 2.0
 threshold = 1.05               # margin-score cutoff; 1.0 = more pairs, 1.1 = half as many
 gap_min_cos = 0.6              # cosine needed to pair lone sentences between two aligned links
-center = true                  # subtract the mean vector before mining; needed for compressed spaces (granite), harmless for the others
+center = true                  # joint mean-centering is important for Granite
+# dimensions = 256             # omit for full size; MiniLM supports only 384
+precision = "int8"             # float32, int8, int4, binary; stored per sentence
+max_tokens = 512               # capped further by each model context
+batch_tokens = 4096            # total physical llama.cpp batch budget
+batch_size = 32                # reuse one resident model across all batches
 
 [embed.models.gemma]
-path = "/Volumes/Falstaff4T/RomeoData2/lmstudio/models/mntcloud/embeddinggemma-300m-Q8_0-better-gguf/embeddinggemma-300M-Q8_0.gguf"
+path = "~/.lmstudio/models/mntcloud/embeddinggemma-300m-Q8_0-better-gguf/embeddinggemma-300M-Q8_0.gguf"
 prefix = "task: sentence similarity | query: "
 
 [embed.models.granite]
-path = "/Volumes/Falstaff4T/RomeoData2/lmstudio/models/mykor/granite-embedding-311m-multilingual-r2-GGUF/granite-embedding-311M-multilingual-r2-Q8_0.gguf"
+path = "~/.lmstudio/models/mykor/granite-embedding-311m-multilingual-r2-GGUF/granite-embedding-311M-multilingual-r2-Q8_0.gguf"
 prefix = ""
 
 [embed.models.jina]
-path = "/Volumes/Falstaff4T/RomeoData2/lmstudio/models/jinaai/jina-embeddings-v5-text-nano-text-matching/v5-nano-text-matching-Q8_0.gguf"
+path = "~/.lmstudio/models/jinaai/jina-embeddings-v5-text-nano-text-matching/v5-nano-text-matching-Q8_0.gguf"
 prefix = "Query: "
+
+
+# Alternative local models use the shared pinned SentenceTransformers pipeline.
+[embed.models.nomic]
+model = "nomic"
+backend = "sentence-transformers"
+device = "mps"
+
+[embed.models.minilm]
+model = "minilm"
+backend = "mlx"               # fastest measured MiniLM route; uv sync --extra mlx
+device = "mps"
+
+[embed.models.voyage-nano]
+model = "voyage-nano"
+backend = "sentence-transformers"
+device = "mps"
+
+[embed.models.voyage-lite]
+model = "voyage-lite"
+backend = "voyage"             # VOYAGE_API_KEY; no user prefix
+
+# Named API profiles; keys come from the environment, never this file.
+[embed.models.jina-api]
+model = "jina"
+backend = "jina"               # JINA_API_KEY
+
+[embed.models.gemma-api]
+model = "gemma"
+backend = "cloudflare"         # CLOUDFLARE_API_TOKEN + CLOUDFLARE_ACCOUNT_ID
+
+[embed.models.granite-api]
+model = "granite"
+backend = "hf"                 # HF_TOKEN and available provider credits
+
+[embed.models.nomic-api]
+model = "nomic"
+backend = "openai"             # self-hosted exact Nomic v2 MoE model
+endpoint = "http://127.0.0.1:18301/v1/embeddings"

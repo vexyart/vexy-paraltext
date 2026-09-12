@@ -22,6 +22,10 @@ class Stub(Embedder):
     def __init__(self) -> None:
         super().__init__("stub", Path("/nonexistent"), "")
 
+    @property
+    def cache_identity(self) -> str:
+        return "test-stub-v1"
+
     def embed(self, texts: list[str]) -> np.ndarray:
         rng = np.random.default_rng(1)
         base = rng.normal(size=(3, 32))
@@ -54,7 +58,7 @@ def book(tmp_path: Path) -> pipeline.Book:
 
 
 def test_run_align_when_three_editions_then_tmx_with_all_languages(book: pipeline.Book, monkeypatch):
-    monkeypatch.setattr(Embedder, "from_alias", classmethod(lambda cls, alias, models=None: Stub()))
+    monkeypatch.setattr(Embedder, "from_alias", classmethod(lambda cls, alias, models=None, **_kwargs: Stub()))
     res = pipeline.run_align(book, model="stub", threshold=1.0)
     assert res.tmx.exists()
     assert res.per_lang == {"de": 3, "en": 3, "fr": 3}
@@ -64,7 +68,7 @@ def test_run_align_when_three_editions_then_tmx_with_all_languages(book: pipelin
 
 
 def test_run_all_when_normalize_disabled_then_convert_then_align(book: pipeline.Book, monkeypatch):
-    monkeypatch.setattr(Embedder, "from_alias", classmethod(lambda cls, alias, models=None: Stub()))
+    monkeypatch.setattr(Embedder, "from_alias", classmethod(lambda cls, alias, models=None, **_kwargs: Stub()))
     res = pipeline.run_all(book, threshold=1.0)
     assert len(res.units) == 3, "cached markdown is reused, no epub conversion attempted"
 
@@ -81,7 +85,7 @@ def test_norm_md_when_enabled_then_next_to_source(book: pipeline.Book):
 
 def test_run_align_when_partial_coverage_then_units_with_two_or_more_languages(book: pipeline.Book, monkeypatch):
     (book.dir / "fr" / "book.md").write_text("\n\n".join([FR[0], FR[2]]))  # French lacks sentence B
-    monkeypatch.setattr(Embedder, "from_alias", classmethod(lambda cls, alias, models=None: Stub()))
+    monkeypatch.setattr(Embedder, "from_alias", classmethod(lambda cls, alias, models=None, **_kwargs: Stub()))
     res = pipeline.run_align(book, model="stub", threshold=1.0)
     langs = [set(u) for u in res.units]
     assert langs == [{"en", "de", "fr"}, {"en", "de"}, {"en", "de", "fr"}], "B is kept as en-de, A and C carry all three"

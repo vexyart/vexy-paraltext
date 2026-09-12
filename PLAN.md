@@ -16,3 +16,7 @@ Pipeline runs end to end on the Frutiger trilingual book; see WORK.md for number
 3. **Trigram spans.** Only if inspection of the full-book TMX shows many 3-1 merges; each extra n-gram costs one more embedding pass.
 4. **Multilingual single volumes** (`de-en`, `de-en-fr` folders): split the one markdown by language (fastText/lingua language ID per paragraph) and treat each as an edition.
 5. **Batch run over all 40 books** and a coverage table in WORK.md; the scanned PDFs (35) go through docling OCR and need a Tesseract language pack or ocrmac per language.
+
+## Release tooling — completed 2026-09-12
+
+- [x] Provide verified Git-tag releases, a real dry run, same-tag retries, and private-data exclusions.
