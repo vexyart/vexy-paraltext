@@ -121,6 +121,20 @@ def next_tag(root: Path, bump: str) -> str:
     return f"v{major + 1}.0.0" if bump == "major" else f"v{major}.{minor + 1}.0"
 
 
+def released_at_head(root: Path) -> str | None:
+    """Return the latest version tag when it already points at a clean HEAD."""
+    from git import Repo
+    from gitnextver.cli import get_last_version_tag
+
+    last = get_last_version_tag(Repo(root))
+    if not last or run(root, "git", "status", "--porcelain", capture=True):
+        return None
+    head = run(root, "git", "rev-parse", "HEAD", capture=True)
+    if run(root, "git", "rev-parse", f"{last}^{{commit}}", capture=True) != head:
+        return None
+    return last
+
+
 def make_tag(root: Path, tag: str, kind: str) -> None:
     public_files(root)
     if kind == "rust":
@@ -295,6 +309,13 @@ def main() -> None:
                 remote_branch.split()[0],
                 "HEAD",
             )
+    if not args.resume and (released := released_at_head(root)):
+        print(
+            f"{config['name']}: nothing to release; {released} already tags HEAD "
+            f"(use --resume {released} to retry its upload)",
+            flush=True,
+        )
+        return
     tag = args.resume or next_tag(root, args.bump)
     print(
         f"{config['name']}: {'preview' if args.dry_run else 'release'} {tag}",
