@@ -5,14 +5,32 @@ this_file: RELEASING.md
 
 ```bash
 ./test.sh                    # Tests; failures stop the command
-./build.sh                   # Local build, with no formatting/source rewrites
-./publish.sh --dry-run       # Tests + next-version artifacts in a disposable Git copy
-./publish.sh                 # Commit changes, tag next patch, build, push, publish
-./publish.sh --bump minor    # Or --bump major
-./publish.sh --resume vX.Y.Z # Retry an existing release at a clean tagged HEAD
+./build.sh                   # Docs (docs/) + package (dist/), twine-checked
+./build.sh package           # Package only
+./publish.sh                 # gitnextver commits, tags next vX.Y.Z, pushes; then build + uv publish
 ```
 
-`publish.sh` includes **all non-ignored working-tree changes** in the release
+`publish.sh` runs `uvx gitnextver`, which commits all pending changes, tags the
+next patch version and pushes. It then requires HEAD to carry a `vX.Y.Z` tag,
+runs `./build.sh package` and uploads `dist/*` with `uv publish`. Set
+`UV_PUBLISH_TOKEN` (or another uv publish credential) first.
+
+## Gated release helper
+
+The previous, stricter release path is kept in `scripts/release.py` (vendored
+from `twardoch/uubed`). It is no longer what `publish.sh` runs. Invoke it
+directly:
+
+```bash
+uv run --no-project --script scripts/release.py --dry-run       # Tests + next-version artifacts in a disposable Git copy
+uv run --no-project --script scripts/release.py                 # Commit, tag next patch, build, push, publish
+uv run --no-project --script scripts/release.py --bump minor    # Or --bump major
+uv run --no-project --script scripts/release.py --resume vX.Y.Z # Retry an existing release at a clean tagged HEAD
+```
+
+The rest of this section describes that helper.
+
+The helper includes **all non-ignored working-tree changes** in the release
 commit. Review `git diff` and `git status` first. It requires an attached branch,
 an `origin` remote (or `--remote NAME`), Git author configuration, uv, and Python
 3.12 (uv can provide it). It fetches tags and stops if the remote branch contains
@@ -61,7 +79,8 @@ The Python/TM tests use sibling source checkouts when present, otherwise release
 packages. Release native Uubed, then Python Uubed, before either consumer.
 
 CI runs tests/builds and retains artifacts. It does not tag or upload packages;
-`publish.sh` is the sole publishing path. Each clone includes its own release
+`publish.sh` (or the helper above) is the only publishing path. The `Docs`
+workflow rebuilds `docs/` from `src_docs/` on pushes to `main`. Each clone includes its own release
 helpers. Their canonical copy is in `twardoch/uubed/scripts/`; maintainers sync
 copies with `python scripts/sync_release_tools.py /path/to/uubed-project` there.
 

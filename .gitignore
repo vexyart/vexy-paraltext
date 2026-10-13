@@ -287,3 +287,6 @@ __pycache__/
 *.dll
 /md.txt
 /paraltext.toml
+
+# Docs build / JS tooling
+node_modules/

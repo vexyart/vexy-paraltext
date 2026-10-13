@@ -4,6 +4,8 @@ this_file: README.md
 
 # vexy-paraltext
 
+**Documentation:** https://vexy.dev/vexy-paraltext/
+
 Turn a folder of translated book editions into one compact TMX translation memory of aligned sentences.
 
 ```
@@ -79,8 +81,13 @@ uv run scripts/compare_lakoff.py BOOK 0 1.05 jina,gemma,granite   # per-language
 uv run scripts/compare_models.py BOOK 2000                        # jina vs gemma on a slice, with sample disagreements
 ```
 
-## Releases and local data
+## Build and release
 
-`./publish.sh --dry-run` verifies the next release without pushing or uploading.
-`./publish.sh` commits, tags and publishes it. See [RELEASING.md](RELEASING.md)
-for credentials, same-tag retries, dependency order and private-data exclusions.
+```bash
+./build.sh            # docs (src_docs/md -> docs/) and package (dist/), twine-checked
+./build.sh docs       # documentation only
+./build.sh package    # package only
+./publish.sh          # gitnextver commits, tags vX.Y.Z and pushes; then build and uv publish
+```
+
+`publish.sh` includes **all non-ignored working-tree changes** in the release commit; review `git status` first. See [RELEASING.md](RELEASING.md) for credentials, the gated `scripts/release.py` helper and private-data exclusions.
