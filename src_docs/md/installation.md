@@ -1,3 +1,8 @@
+---
+this_file: src_docs/md/installation.md
+tags: [Installation]
+---
+
 # Installation
 
 `vexy-paraltext` is a Python package with a command-line tool. Text extraction depends on a few external programs that you install separately.

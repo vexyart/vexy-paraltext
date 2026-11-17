@@ -291,3 +291,9 @@ The shared archive gate now checks every License-File declaration in metadata
 misplaced and directory-only licenses fail before pushing or uploading. Synced
 the helper across all six repositories. Verification: 14 release-tool tests
 passed; nine existing sibling preview artifacts passed the stronger checks.
+
+## 2026-10-18: documentation plugins
+
+- Use MaterialX search, inherited metadata and a topic index; keep ordered navigation in awesome-nav.
+- The documentation wrapper installs the plugins required by this site.
+- Strict documentation build and rendered output checks passed.

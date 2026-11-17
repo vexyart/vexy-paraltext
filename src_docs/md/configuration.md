@@ -1,3 +1,8 @@
+---
+this_file: src_docs/md/configuration.md
+tags: [Configuration]
+---
+
 # Configuration
 
 Settings live in a TOML file named `paraltext.toml`. Every key is optional; a missing key keeps its built-in default. Command-line options override the file for one call.

@@ -1,3 +1,8 @@
+---
+this_file: src_docs/md/troubleshooting.md
+tags: [Troubleshooting]
+---
+
 # Troubleshooting
 
 Messages below are quoted from the code. Add `--verbose` to any command to see debug logging, including every converter command line.

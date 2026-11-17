@@ -1,0 +1,13 @@
+# this_file: src_docs/md/.nav.yml
+nav:
+  - Home: index.md
+  - Installation: installation.md
+  - Quickstart: quickstart.md
+  - Command line: cli.md
+  - Configuration: configuration.md
+  - How it works: how-it-works.md
+  - Embedding models: models.md
+  - TMX output: output.md
+  - Troubleshooting: troubleshooting.md
+  - Development: development.md
+  - Topics: topics.md
